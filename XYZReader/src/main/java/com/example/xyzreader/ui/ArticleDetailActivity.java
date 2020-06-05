@@ -3,19 +3,21 @@ package com.example.xyzreader.ui;
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.app.LoaderManager;
+import android.content.Intent;
 import android.content.Loader;
 import android.database.Cursor;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.design.widget.CollapsingToolbarLayout;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v13.app.FragmentStatePagerAdapter;
+import android.support.v4.app.ShareCompat;
 import android.support.v4.view.ViewPager;
+import android.support.v4.view.ViewPager.OnPageChangeListener;
 import android.support.v7.app.AppCompatActivity;
 import android.util.TypedValue;
 import android.view.View;
-import android.view.ViewGroup;
-import android.view.WindowInsets;
 import android.widget.ImageView;
 
 import com.example.xyzreader.R;
@@ -38,8 +40,9 @@ public class ArticleDetailActivity extends AppCompatActivity
 
     private ViewPager mPager;
     private MyPagerAdapter mPagerAdapter;
-//    private View mUpButtonContainer;
+    //    private View mUpButtonContainer;
 //    private View mUpButton;
+    private OnPageChangeListener listener;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -59,29 +62,54 @@ public class ArticleDetailActivity extends AppCompatActivity
         mPager.setPageMargin((int) TypedValue
                 .applyDimension(TypedValue.COMPLEX_UNIT_DIP, 1, getResources().getDisplayMetrics()));
         mPager.setPageMarginDrawable(new ColorDrawable(0x22000000));
+        final FloatingActionButton shareFab = findViewById(R.id.share_fab);
+        shareFab.setOnClickListener(new View.OnClickListener() {
 
-        mPager.setOnPageChangeListener(new ViewPager.SimpleOnPageChangeListener() {
             @Override
-            public void onPageScrollStateChanged(int state) {
-                super.onPageScrollStateChanged(state);
+            public void onClick(View v) {
+                startActivity(Intent.createChooser(ShareCompat.IntentBuilder.from(ArticleDetailActivity.this)
+                        .setType("text/plain")
+                        .setText("Some sample text")
+                        .getIntent(), getString(R.string.action_share)));
+            }
+        });
+        listener = new OnPageChangeListener() {
+
+            @Override
+            public void onPageScrolled(int position, float positionOffset,
+                                       int positionOffsetPixels) {
 
             }
 
             @Override
             public void onPageSelected(int position) {
-                if (mCursor != null) {
-                    mCursor.moveToPosition(position);
-                    String photoUrl = mCursor.getString(ArticleLoader.Query.PHOTO_URL);
-                    ImageView photo = findViewById(R.id.photo);
-                    Picasso.get()
-                            .load(photoUrl)
-                            .error(R.drawable.error)
-                            .into(photo);
-                }
-                mSelectedItemId = mCursor.getLong(ArticleLoader.Query._ID);
-            }
-        });
 
+                mCursor.moveToPosition(position);
+
+                String photoUrl = mCursor.getString(ArticleLoader.Query.PHOTO_URL);
+                ImageView photo = findViewById(R.id.photo);
+                Picasso.get()
+                        .load(photoUrl)
+                        .error(R.drawable.error)
+                        .into(photo);
+            }
+
+            @Override
+            public void onPageScrollStateChanged(int state) {
+
+                switch (state) {
+                    case ViewPager.SCROLL_STATE_DRAGGING:
+                        shareFab.hide();
+                        break;
+                    case ViewPager.SCROLL_STATE_IDLE:
+                        shareFab.show();
+                        break;
+                }
+
+            }
+
+        };
+        mPager.addOnPageChangeListener(listener);
         if (savedInstanceState == null) {
             if (getIntent() != null && getIntent().getData() != null) {
                 mStartId = ItemsContract.Items.getItemId(getIntent().getData());
@@ -99,6 +127,17 @@ public class ArticleDetailActivity extends AppCompatActivity
     public void onLoadFinished(Loader<Cursor> cursorLoader, Cursor cursor) {
         mCursor = cursor;
         mPagerAdapter.notifyDataSetChanged();
+
+        mPager.post(new Runnable() {
+
+            @Override
+            public void run() {
+
+                listener.onPageSelected(mPager.getCurrentItem());
+
+            }
+
+        });
 
         // Select the start ID
         if (mStartId > 0) {
