@@ -99,7 +99,6 @@ public class ArticleDetailFragment extends Fragment implements
         mRootView = inflater.inflate(R.layout.fragment_article_detail, container, false);
 
         ColorDrawable mStatusBarColorDrawable = new ColorDrawable(0);
-
         bindViews();
         return mRootView;
     }

@@ -21,6 +21,7 @@ import android.util.TypedValue;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 
 import com.example.xyzreader.R;
 import com.example.xyzreader.data.ArticleLoader;
@@ -43,6 +44,7 @@ public class ArticleDetailActivity extends AppCompatActivity
     private ViewPager mPager;
     private MyPagerAdapter mPagerAdapter;
     private OnPageChangeListener listener;
+    private ProgressBar progressBar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -58,7 +60,8 @@ public class ArticleDetailActivity extends AppCompatActivity
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         ((CollapsingToolbarLayout) findViewById(R.id.collapsing_toolbar_layout)).setTitle(getString(R.string.app_name));
         getLoaderManager().initLoader(0, null, this);
-
+        progressBar = findViewById(R.id.progress_bar);
+        progressBar.setVisibility(View.VISIBLE);
         mPagerAdapter = new MyPagerAdapter(getFragmentManager());
         mPager = (ViewPager) findViewById(R.id.pager);
         mPager.setAdapter(mPagerAdapter);
@@ -135,11 +138,11 @@ public class ArticleDetailActivity extends AppCompatActivity
 
             @Override
             public void run() {
-
                 listener.onPageSelected(mPager.getCurrentItem());
-
+                progressBar.setVisibility(View.GONE);
             }
 
+            ;
         });
 
         // Select the start ID

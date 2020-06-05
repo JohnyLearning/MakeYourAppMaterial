@@ -31,21 +31,6 @@
                             app:layout_constraintTop_toTopOf="parent"
                             tools:text="Blabla article title" />
 
-<!--                        <ImageButton-->
-<!--                            android:id="@+id/share_fab"-->
-<!--                            android:layout_width="56dp"-->
-<!--                            android:layout_height="56dp"-->
-<!--                            android:layout_marginEnd="6dp"-->
-<!--                            android:background="@drawable/add_fab_background"-->
-<!--                            android:contentDescription="@string/action_share"-->
-<!--                            android:elevation="@dimen/fab_elevation"-->
-
-<!--                            android:src="@drawable/ic_share"-->
-<!--                            android:stateListAnimator="@animator/fab_state_list_anim"-->
-<!--                            app:layout_constraintBottom_toBottomOf="@id/photo"-->
-<!--                            app:layout_constraintEnd_toEndOf="parent"-->
-<!--                            app:layout_constraintTop_toTopOf="@id/article_title" />-->
-
                         <TextView
                             android:id="@+id/article_byline"
                             style="?android:attr/textAppearanceSmall"
