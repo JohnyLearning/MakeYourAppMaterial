@@ -14,7 +14,7 @@
             android:layout_width="match_parent"
             android:layout_height="?actionBarSize"
             android:background="@color/colorPrimary"
-            android:elevation="6dp"
+            android:elevation="@dimen/app_bar_elevation"
             app:layout_scrollFlags="scroll"
             android:layout_gravity="bottom">
 
