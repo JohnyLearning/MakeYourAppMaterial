@@ -7,6 +7,9 @@ import android.database.Cursor;
 import android.graphics.Typeface;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.text.Html;
 import android.text.Spannable;
 import android.text.SpannableStringBuilder;
@@ -134,12 +137,8 @@ public class ArticleDetailFragment extends Fragment implements
         }
 
         TextView titleView = (TextView) mRootView.findViewById(R.id.article_title);
-        TextView bylineView = (TextView) mRootView.findViewById(R.id.article_byline);
+        TextView bylineView = mRootView.findViewById(R.id.article_byline);
         bylineView.setMovementMethod(new LinkMovementMethod());
-        TextView bodyView = (TextView) mRootView.findViewById(R.id.article_body);
-
-
-        bodyView.setTypeface(Typeface.createFromAsset(getResources().getAssets(), "Rosario-Regular.ttf"));
 
         if (mCursor != null) {
             mRootView.setAlpha(0);
@@ -160,16 +159,25 @@ public class ArticleDetailFragment extends Fragment implements
                         getString(R.string.byline, outputFormat.format(publishedDate), boldString(mCursor.getString(ArticleLoader.Query.AUTHOR))));
             }
             String body = mCursor.getString(ArticleLoader.Query.BODY)
-                    .replace("\r\n\r\n", "<br /><br />")
-                    .replace("\r\n    ", "<br />    ")
+                    .replace("\r\n\r\n", "\n")
+                    .replace("\r\n    ", "\n")
                     .replace("\r\n", " ");
-            bodyView.setText(Html.fromHtml(body));
+            setupArticleContent(body);
         } else {
             mRootView.setVisibility(View.GONE);
             titleView.setText("N/A");
             bylineView.setText("N/A" );
-            bodyView.setText("N/A");
+            setupArticleContent("N/A");
         }
+    }
+
+    private void setupArticleContent(String content) {
+        RecyclerView articleContent = mRootView.findViewById(R.id.article_body);
+        LinearLayoutManager layoutManager = new LinearLayoutManager(getActivity());
+        articleContent.setLayoutManager(layoutManager);
+        String[] contentArray = content.split("\n");
+        ArticleContentAdapter adapter = new ArticleContentAdapter(contentArray);
+        articleContent.setAdapter(adapter);
     }
 
     private SpannableStringBuilder boldString(String text) {
@@ -209,4 +217,44 @@ public class ArticleDetailFragment extends Fragment implements
         bindViews();
     }
 
+    private class ArticleContentAdapter extends RecyclerView.Adapter<ViewHolder> {
+
+        private String[] content;
+
+        ArticleContentAdapter(String[] content) {
+            this.content = content;
+        }
+
+        @NonNull
+        @Override
+        public ViewHolder onCreateViewHolder(@NonNull ViewGroup viewGroup, int i) {
+            LayoutInflater layoutInflater = LayoutInflater.from(getActivity());
+            View view = layoutInflater.inflate(R.layout.article_content_snippet, viewGroup, false);
+            return new ViewHolder(view);
+        }
+
+        @Override
+        public int getItemCount() {
+            return content != null ? content.length : 0;
+        }
+
+        @Override
+        public void onBindViewHolder(@NonNull ViewHolder viewHolder, int i) {
+            viewHolder.content.setText(content[i]);
+        }
+
+    }
+
+    public static class ViewHolder extends RecyclerView.ViewHolder {
+
+        final TextView content;
+
+        ViewHolder(View view) {
+
+            super(view);
+            content = view.findViewById(R.id.article_content);
+
+        }
+
+    }
 }
